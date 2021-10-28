@@ -2,7 +2,7 @@
 <!---
 CHESS Lab stands for C
 --->
-Our Github was created as a central platform for students, professors, and interested folk to efficiently access our updated codes and projects! 
+Our Github was created as a central platform for students, professors, and others who are inerested to efficiently access CHESS lab's updated codes and projects! 
 
 For further questions and information:
 <br/> :envelope: email: john.quinn@furman.edu <br/> :desktop_computer: website: https://johnquinniv.wixsite.com/johnquinniv 
