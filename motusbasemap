@@ -1,5 +1,7 @@
 ###this code attempts to plot the raster data with a basemap. 
 
+### testing 123
+
 ##how I originally plotted the data. While this code worked well, it provided no context outside 
 ## the raster image, and I would like to contextualize the raster with some surrounding terrain mapping. I also want to plot raster with ggplot. 
 RA.NDVI2022241<-raster("MOD13Q1.061__250m_16_days_NDVI_doy2022241_aid0001.tif")
