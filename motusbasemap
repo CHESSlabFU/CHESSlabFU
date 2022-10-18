@@ -1,0 +1,70 @@
+###this code attempts to plot the raster data with a basemap. 
+
+##how I originally plotted the data. While this code worked well, it provided no context outside 
+## the raster image, and I would like to contextualize the raster with some surrounding terrain mapping. I also want to plot raster with ggplot. 
+RA.NDVI2022241<-raster("MOD13Q1.061__250m_16_days_NDVI_doy2022241_aid0001.tif")
+RA.NDVI2022241.plot<-plot(RA.NDVI2022241,main="Restoration Area NDVI doy2022241", 
+                          ylab="latitude",
+                          xlab="longitude",
+                          zlim = c(0,3000)) 
+                          
+
+##preamble of new packages
+library(rnaturalearth); library(rnaturalearthdata)
+library(plotly)
+library(motus)
+library(motusData)
+library(ggmap)
+library(dplyr)
+
+##downloading grayscale maps (https://motuswts.github.io/motus/articles/06-exploring-data.html)
+world <- ne_countries(scale = "medium", returnclass = "sf") 
+lakes <- ne_download(scale = "medium", type = 'lakes', category = 'physical',
+                     returnclass = "sf", destdir = "map-data") # only need this first time downloading
+lakes <- ne_load(type = "lakes", scale = "medium", category = 'physical',
+                 returnclass = "sf",
+                 destdir = "map-data") # use this if already downloaded shapefiles
+
+##downloading Stamen Map basemap
+get_stamenmap(PCD, maptype = "terrain-background", #select maptype
+              zoom = 6) %>% ggmap() ###THIS CODE DID NOT WORK!!###
+              ##ERROR RETURNED: "Error in gzfile(file, "rb") : cannot open the connection"
+      # I would like to use this basemap if we can get it to work because it will provide more context for our small area
+      
+      
+##plotting grayscale map, clipped to our area of study -- no raster on top
+ggplot(world) + 
+  geom_sf(colour = NA) +
+  geom_sf(data = lakes, colour = NA, fill = "white") +
+  coord_sf(xlim = c(-104.34, -104.24), ylim = c(38.27, 38.39), expand = FALSE)
+  
+##overlaying raster data to grayscale map
+ggplot(world) + 
+  geom_sf(colour = NA) +
+  geom_sf(data = lakes, colour = NA, fill = "white") +
+  coord_sf(xlim = c(-104.34, -104.24), ylim = c(38.27, 38.39), expand = FALSE) +
+  geom_tile(data=RA.NDVI2022241, aes(x,y))+
+  ylab("Latitude")+ xlab("Longitude")
+  ###RASTER DATA IS MONOCROMATIC -- need to define a "fill" for the raster data, 
+  ### but how do you specify a fill without a dataframe associated with raster data? There are no columns to define as the fill column 
+  
+##attempt to plot the raster data using ggplot2
+ggplot()+
+  geom_raster(RA.NDVI2022241, aes(xmin = -104.34, xmax = -104.2, ymin = 38.27, ymax = 38.39))+
+  scale_fill_gradient(colour=palette)
+  ###ERROR RETURNED: Error: `mapping` must be created by `aes()`
+  
+##another attempt to plot the raster data using ggplot2
+ggplot(RA.NDVI2022241, aes(xmin = -104.34, xmax = -104.2, ymin = 38.27, ymax = 38.39))+
+  geom_rect(aes(fill=values), colours=palette)
+  ###ERROR RETURNED: Don't know how to automatically pick scale for object of type standardGeneric. Defaulting to continuous.
+  ###                Error: Aesthetics must be valid data columns. Problematic aesthetic(s): fill = values. 
+  ###                Did you mistype the name of a data column or forget to add after_stat()?
+    #Adding after_stat() to the fill returns the following error: 
+    # Error: Aesthetics must be valid computed stats. Problematic aesthetic(s): fill = after_stat(values). 
+    #  Did you map your stat in the wrong layer?
+    
+#My thought process is that if I can plot the raster using ggplot2, I can combine it with the baselayer using ggmap. 
+#There are two problems to solve: 1. Retrieving the Stamenmap using get_stamenmap()
+#                                 2. Plotting the raster using ggplot2 -- I have to define a fill value through aes() and am 
+#                                                                         struggling to figure out how to do that. 
